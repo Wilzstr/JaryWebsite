@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: black;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .menu {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .menu h2 {
+      margin-bottom: 20px;
+      color: #bb86fc;
+    }
+
+    .btn {
+      display: inline-block;
+      margin: 10px;
+      padding: 15px 30px;
+      border-radius: 15px;
+      background: linear-gradient(90deg, #9d4edd, #6a00f4);
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 10px #9d4edd, 0 0 20px #6a00f4;
+      transition: 0.3s;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px #bb86fc, 0 0 30px #6a00f4;
+    }
+
+    #message {
+      margin-top: 15px;
+      color: #ff4d6d;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+
+  <div class="menu">
+    <h2>WELCOME <span id="username"></span></h2>
+    <div id="buttons">
+      <!-- tombol akan diisi JS -->
+    </div>
+    <p id="message"></p>
+  </div>
+
+  <script>
+// Link raw JSON GitHub
+const USERS_URL = "https://raw.githubusercontent.com/Wilzstr/JaryWebsite/branch/users.json";
+const OWNER_URL = "https://raw.githubusercontent.com/Wilzstr/JaryWebsite/branch/owner.json";
+
+async function login() {
+  const name = document.getElementById("username").value.trim();
+  const msg = document.getElementById("message");
+
+  if (!name) {
+    msg.textContent = "Isi dulu name kamu!";
+    return;
+  }
+
+  try {
+    const [usersRes, ownerRes] = await Promise.all([
+      fetch(USERS_URL),
+      fetch(OWNER_URL)
+    ]);
+    const users = await usersRes.json();
+    const owners = await ownerRes.json();
+
+    if (users.includes(name) || owners.includes(name)) {
+      msg.style.color = "lime";
+      msg.textContent = "Login berhasil! Selamat datang " + name;
+
+      // simpan role juga
+      const role = owners.includes(name) ? "owner" : "user";
+      localStorage.setItem("username", name);
+      localStorage.setItem("role", role);
+
+      setTimeout(() => {
+        window.location.href = "home.html";
+      }, 1000);
+    } else {
+      msg.style.color = "red";
+      msg.textContent = "Name tidak terdaftar!";
+    }
+  } catch (err) {
+    msg.textContent = "Gagal ambil data JSON!";
+  }
+}
+
+    const user = localStorage.getItem("username");
+const role = localStorage.getItem("role");
+document.getElementById("username").textContent = user || "Unknown";
+
+const buttons = document.getElementById("buttons");
+
+// Tombol umum
+buttons.innerHTML += `<a class="btn" href="#">🏠 HOME</a>`;
+
+// Tombol owner
+if (role === "owner") {
+  buttons.innerHTML += `<a class="btn" href="adduser.html">➕ ADD USER</a>`;
+}
+      } catch (e) {
+        document.getElementById("message").textContent = "Gagal ambil owner.json!";
+      }
+    }
+
+    loadButtons();
+
+    // Background ungu partikel
+    const canvas = document.getElementById("bg");
+    const ctx = canvas.getContext("2d");
+    let w, h;
+    function resize() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    const particles = [];
+    for (let i = 0; i < 80; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        dx: (Math.random() - 0.5) * 1,
+        dy: (Math.random() - 0.5) * 1,
+        r: Math.random() * 3 + 2
+      });
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = "rgba(155, 50, 255, 0.8)";
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+
+        p.x += p.dx;
+        p.y += p.dy;
+
+        if (p.x < 0 || p.x > w) p.dx *= -1;
+        if (p.y < 0 || p.y > h) p.dy *= -1;
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+</body>
+                  </html>
